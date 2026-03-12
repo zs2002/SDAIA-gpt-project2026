@@ -5,7 +5,8 @@ import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from src.model.transformer import TransformerBlock
+from src.config import GPTConfig
+from src.model.transformer import GPTModel, TransformerBlock
 
 
 # ===========================================================================
@@ -71,4 +72,49 @@ def test_property_transformer_block_shape_invariant(batch_size, seq_len, num_hea
 
     assert output.shape == (batch_size, seq_len, d_model), (
         f"Expected shape ({batch_size}, {seq_len}, {d_model}), got {output.shape}"
+    )
+
+
+# Feature: gpt-from-scratch, Property 16: GPT model output shape
+@settings(max_examples=100)
+@given(
+    batch_size=st.integers(min_value=1, max_value=2),
+    num_heads=st.sampled_from([1, 2, 4]),
+    head_dim=st.integers(min_value=2, max_value=8),
+    num_layers=st.integers(min_value=1, max_value=2),
+    vocab_size=st.integers(min_value=50, max_value=200),
+    max_seq_len=st.integers(min_value=16, max_value=64),
+    data=st.data(),
+)
+def test_property_gpt_model_output_shape(
+    batch_size, num_heads, head_dim, num_layers, vocab_size, max_seq_len, data
+):
+    """**Validates: Requirements 8.2, 8.4**
+
+    For any batch size B, sequence length S (where S <= max_seq_len), and GPTConfig,
+    the GPT_Model SHALL produce logits of shape (B, S, vocab_size) given input token
+    IDs of shape (B, S).
+    """
+    d_model = num_heads * head_dim
+    seq_len = data.draw(st.integers(min_value=1, max_value=max_seq_len), label="seq_len")
+
+    config = GPTConfig(
+        vocab_size=vocab_size,
+        d_model=d_model,
+        num_heads=num_heads,
+        num_layers=num_layers,
+        max_seq_len=max_seq_len,
+        dropout_rate=0.0,
+    )
+
+    model = GPTModel(config)
+    model.eval()
+
+    token_ids = torch.randint(0, vocab_size, (batch_size, seq_len))
+
+    with torch.no_grad():
+        logits = model(token_ids)
+
+    assert logits.shape == (batch_size, seq_len, vocab_size), (
+        f"Expected shape ({batch_size}, {seq_len}, {vocab_size}), got {logits.shape}"
     )
