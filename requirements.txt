@@ -1,0 +1,7 @@
+torch
+hypothesis
+pytest
+streamlit
+matplotlib
+requests
+numpy

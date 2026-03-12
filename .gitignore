@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Testing
+.hypothesis/
+.pytest_cache/
+
+# IDE
+.vscode/
+.kiro/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Checkpoints (large binary files — uncomment to track them)
+# checkpoints/pretrained/*.pt
+# checkpoints/finetuned/*.pt
