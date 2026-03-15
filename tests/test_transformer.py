@@ -118,3 +118,42 @@ def test_property_gpt_model_output_shape(
     assert logits.shape == (batch_size, seq_len, vocab_size), (
         f"Expected shape ({batch_size}, {seq_len}, {vocab_size}), got {logits.shape}"
     )
+
+
+# Feature: gpt-from-scratch, Property 17: GPT model rejects over-length sequences
+@settings(max_examples=100)
+@given(
+    num_heads=st.sampled_from([1, 2, 4]),
+    head_dim=st.integers(min_value=2, max_value=8),
+    num_layers=st.integers(min_value=1, max_value=2),
+    vocab_size=st.integers(min_value=50, max_value=200),
+    max_seq_len=st.integers(min_value=8, max_value=32),
+    seq_len_offset=st.integers(min_value=1, max_value=10),
+)
+def test_property_gpt_model_rejects_over_length_sequences(
+    num_heads, head_dim, num_layers, vocab_size, max_seq_len, seq_len_offset
+):
+    """**Validates: Requirements 8.5**
+
+    For any input tensor with sequence length S > config.max_seq_len,
+    the GPT_Model's forward pass SHALL raise a ValueError.
+    """
+    d_model = num_heads * head_dim
+    seq_len = max_seq_len + seq_len_offset  # always > max_seq_len
+
+    config = GPTConfig(
+        vocab_size=vocab_size,
+        d_model=d_model,
+        num_heads=num_heads,
+        num_layers=num_layers,
+        max_seq_len=max_seq_len,
+        dropout_rate=0.0,
+    )
+
+    model = GPTModel(config)
+    model.eval()
+
+    token_ids = torch.randint(0, vocab_size, (1, seq_len))
+
+    with pytest.raises(ValueError):
+        model(token_ids)

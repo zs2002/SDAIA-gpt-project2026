@@ -15,6 +15,16 @@ __pycache__/
 Thumbs.db
 .DS_Store
 
-# Checkpoints (large binary files — uncomment to track them)
-# checkpoints/pretrained/*.pt
-# checkpoints/finetuned/*.pt
+# Checkpoints (large binary files)
+checkpoints/pretrained/*.pt
+checkpoints/finetuned/*.pt
+
+# Notebook build scripts (internal tooling)
+notebooks/_build_*.py
+notebooks/_gen_*.py
+notebooks/_check_*.py
+notebooks/_patch_*.py
+notebooks/_validate_*.py
+
+# Temp verification scripts
+_verify_*.py
