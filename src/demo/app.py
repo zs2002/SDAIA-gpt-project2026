@@ -92,7 +92,11 @@ def _load_model_and_tokenizer(ckpt_path: str) -> tuple[GPTModel, BPETokenizer]:
     The checkpoint is expected to contain at minimum ``model_state_dict`` and
     ``config`` (a GPTConfig instance or dict).
     """
-    checkpoint = torch.load(ckpt_path, map_location="cpu", weights_only=False)
+    # weights_only=True: checkpoints here only ever contain tensors + built-in
+    # types (dicts/lists/ints/floats via dataclasses.asdict, see
+    # src/training/{pretrain,finetune}.py) — no arbitrary object unpickling
+    # is required, so safe (unpickling-restricted) loading is used.
+    checkpoint = torch.load(ckpt_path, map_location="cpu", weights_only=True)
 
     # Reconstruct GPTConfig
     cfg = checkpoint.get("config")

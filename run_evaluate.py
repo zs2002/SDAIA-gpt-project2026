@@ -48,7 +48,11 @@ def main() -> None:
     tokenizer = BPETokenizer()
     tokenizer.load(args.tokenizer)
 
-    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
+    # weights_only=True: checkpoints here only ever contain tensors + built-in
+    # types (dicts/lists/ints/floats via dataclasses.asdict, see
+    # src/training/{pretrain,finetune}.py) — no arbitrary object unpickling
+    # is required, so safe (unpickling-restricted) loading is used.
+    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
     gpt_config = ckpt["config"]
     model = GPTModel(gpt_config)
     model.load_state_dict(ckpt["model_state_dict"])
