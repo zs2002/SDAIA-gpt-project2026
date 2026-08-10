@@ -1,7 +1,7 @@
-torch
-hypothesis
-pytest
-streamlit
-matplotlib
-requests
-numpy
+torch==2.13.0
+hypothesis==6.165.2
+pytest==9.1.1
+streamlit==1.61.1
+matplotlib==3.11.1
+requests==2.34.2
+numpy==2.5.2
